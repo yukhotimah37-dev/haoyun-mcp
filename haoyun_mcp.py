@@ -4,10 +4,16 @@ from starlette.routing import Mount
 import uvicorn
 import os
 
-# 1. 拆分成三个完全独立的 MCP 服务器
-mcp_fetal = FastMCP("B超测算")
-mcp_ogtt = FastMCP("糖耐量评估")
-mcp_weight = FastMCP("体重追踪")
+# 🚨 新增：导入解除云端域名限制的配置库
+from mcp.server.transport_security import TransportSecuritySettings
+
+# 🚨 核心修复：关闭严格的本地 DNS 保护，允许云端服务器域名访问
+security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
+
+# 1. 在每个工具初始化时加上这个解除限制的配置
+mcp_fetal = FastMCP("B超测算", transport_security=security)
+mcp_ogtt = FastMCP("糖耐量评估", transport_security=security)
+mcp_weight = FastMCP("体重追踪", transport_security=security)
 
 # ================= 工具 1 =================
 @mcp_fetal.tool()
